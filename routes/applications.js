@@ -7,6 +7,7 @@ const { application } = require('express');
 //Get Requests
 
 //Get all apps
+//Not to be used in production
 router.route('/').get((req, res) => {
     Application.find()
         .then(applications => res.json(applications))
@@ -14,9 +15,9 @@ router.route('/').get((req, res) => {
 });
 
 //Get user apps
-router.route('/userapps').get((req, res) => {
-    const uid = req.body.uid;
-
+// Will require further authentication
+router.route('/:id').get((req, res) => {
+    const uid = req.params.id;
     User.findById(uid)
         .then((user) => {
             let applicationIds = user.applications;
@@ -57,21 +58,17 @@ router.route('/add').post((req, res) => {
         jobTitle,
         jobId,
     });
-
+    //Add new application to the users base
     newApplication.save()
         .then((app) => { 
-
             User.findById(uid)
                 .then((user) => {
                     let newApplications = user.applications;
-                    newApplications.push(app._id)
-
-                    User.findByIdAndUpdate(uid, {uid: uid, applications: newApplications})
-                        .then(() => res.json("Application created and added to " + uid));
-                        //.catch Delete the application and try again (Not so important rn, I can manually delete all of them myself)
-
+                    newApplications.push(app._id);
+                    user.applications = newApplications;
+                    user.save().then(() => res.json("Application created and added to " + uid));
+                    //.catch Delete the application and try again (Not so important rn, I can manually delete all of them myself)
                 }).catch(err => res.status(400).json('Error: ' + err));
-
         }).catch(err => res.status(400).json('Error: ' + err));
 });
 

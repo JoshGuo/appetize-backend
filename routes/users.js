@@ -12,8 +12,8 @@ router.route('/').get((req, res) => {
 });
 
 //Get Single User by ID
-router.route('/user').get((req, res) => {
-    User.findById(req.body.uid)
+router.route('/:id').get((req, res) => {
+    User.findById(req.params.id)
         .then((user) => {
             res.json(user);
         }).catch(err => res.status(400).json('Error: ' + err));
@@ -25,7 +25,6 @@ router.route('/user').get((req, res) => {
 //Add new user
 router.route('/add').post((req, res) => {
     const email = req.body.email;
-
     const newUser = new User({email});
 
     newUser.save()
